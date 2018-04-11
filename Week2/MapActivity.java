@@ -1,4 +1,6 @@
-package com.codinggirls.zombierun;
+package com.xu.zombierunteach;
+
+
 
 
 import com.google.android.gms.common.ConnectionResult;
@@ -77,6 +79,7 @@ public class MapActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_map);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         distanceShower = findViewById(R.id.distanceshower);
+        allMarkers = new ArrayList<Marker>();
 
 
     }
@@ -114,7 +117,6 @@ public class MapActivity extends AppCompatActivity implements
             LatLng loc = new LatLng(lat, lon);
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
             /*
-
              */
         }
 
@@ -186,7 +188,7 @@ public class MapActivity extends AppCompatActivity implements
 
 
         this.googleMap = map;
-
+        checkLocationPermission();
 
         map.setMyLocationEnabled(true);
         googleMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -196,7 +198,7 @@ public class MapActivity extends AppCompatActivity implements
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
 
-        checkLocationPermission();
+
 
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
@@ -257,16 +259,17 @@ public class MapActivity extends AppCompatActivity implements
         temp = googleMap.addMarker(markerOptions);
         temp.setTag(ID);
         allMarkers.add(temp);
-        measureDistance(point);
+        measureDistance(point,ID);
 
     }
 
-    private void measureDistance(LatLng point){
+    private void measureDistance(LatLng point, int ID){
         Location markerLocation = new Location(LocationManager.NETWORK_PROVIDER);
         markerLocation.setLatitude(point.latitude);
         markerLocation.setLongitude(point.longitude);
         float distance = mLastLocation.distanceTo(markerLocation);
-        distanceShower.setText(String.valueOf(distance));
+
+        distanceShower.setText("Distance "+String.valueOf(distance) + " m" + "\n ID: "+ID);
     }
 
     //callback from RequestPermissions() method, handling the user's response to our requests
@@ -329,7 +332,7 @@ public class MapActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.share_menu, menu);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -345,4 +348,3 @@ public class MapActivity extends AppCompatActivity implements
 
 
 }
-
