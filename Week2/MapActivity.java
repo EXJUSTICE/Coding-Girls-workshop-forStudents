@@ -84,7 +84,7 @@ public class MapActivity extends AppCompatActivity implements
 
     }
 
-
+//-----------------------------------------GoogleAPI code starts here----------------------------------------------------------------
 
 
 
@@ -127,6 +127,7 @@ public class MapActivity extends AppCompatActivity implements
 
     }
     //In theory, this method is called every time the User's location changes. In practice, it is called every few seconds automatically
+    // The location in the argument delivered by the Location API with the user's value. We then use this value to do things in our code
     @Override
     public void onLocationChanged(Location location) {
         //Heres the code to track user location. Extracting Coordinates from location. One can add markers or do whatever when the user momves.
@@ -152,6 +153,7 @@ public class MapActivity extends AppCompatActivity implements
         buildGoogleApiClient();
     }
 
+    //Universal Google API client connector. Called when you want to access Google's APIs. You can attach multiple ones.
     synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -182,7 +184,7 @@ public class MapActivity extends AppCompatActivity implements
         mGoogleApiClient.disconnect();
     }
 
-    //This code gets called by GoogleMaps as soon as the Map is Ready. We want to put all map-related code here
+    //This code gets called by API as soon as the GoogleMap is Ready. We want to put all map-related code here
     @Override
     public void onMapReady(GoogleMap map) {
 
@@ -212,12 +214,9 @@ public class MapActivity extends AppCompatActivity implements
 
 
     }
-    //spwns a zombie Marker on map
-    public void spawnzombie(LatLng zombielatlng) {
-        drawZombieMarker(zombielatlng, zombieID);
-        zombieID += 1;
-    }
+
     // A fallback check in case we do not have GoogleAPI for any reason (i.e. no internet)
+    //At the moment we simply display the error in a toast.
     public boolean isGooglePlayServicesAvailable(Activity activity) {
         GoogleApiAvailability api = GoogleApiAvailability.getInstance();
         int status = api.isGooglePlayServicesAvailable(this);
@@ -240,36 +239,13 @@ public class MapActivity extends AppCompatActivity implements
     public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //No permission allowed, force user to give one
+            //Note that we are requesting excessively here, but serves as an example..
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.CAMERA, Manifest.permission.WRITE_SETTINGS, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_LOCATION);
             return false;
         } else {
             return true;
         }
 
-    }
-
-    //DrawZombieMarker
-    private void drawZombieMarker(LatLng point, int ID) {
-        Marker temp;
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(point);
-        markerOptions.icon(BitmapDescriptorFactory
-                .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-
-        temp = googleMap.addMarker(markerOptions);
-        temp.setTag(ID);
-        allMarkers.add(temp);
-        measureDistance(point,ID);
-
-    }
-
-    private void measureDistance(LatLng point, int ID){
-        Location markerLocation = new Location(LocationManager.NETWORK_PROVIDER);
-        markerLocation.setLatitude(point.latitude);
-        markerLocation.setLongitude(point.longitude);
-        float distance = mLastLocation.distanceTo(markerLocation);
-
-        distanceShower.setText("Distance "+String.valueOf(distance) + " m" + "\n ID: "+ID);
     }
 
     //callback from RequestPermissions() method, handling the user's response to our requests
@@ -295,6 +271,38 @@ public class MapActivity extends AppCompatActivity implements
             }
         }
     }
+
+    //-----------------------------------------------------------------------------------------------Google API code ends here --------------------------------------//
+    //spawns a zombie Marker on map, along with an incremented tag
+    public void spawnzombie(LatLng zombielatlng) {
+        drawZombieMarker(zombielatlng, zombieID);
+        zombieID += 1;
+    }
+
+    // Actual code for adding markers into map, along with an ID tag
+    private void drawZombieMarker(LatLng point, int ID) {
+        Marker temp;
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(point);
+        markerOptions.icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+
+        temp = googleMap.addMarker(markerOptions);
+        temp.setTag(ID);
+        allMarkers.add(temp);
+        measureDistance(point,ID);
+
+    }
+
+    private void measureDistance(LatLng point, int ID){
+        Location markerLocation = new Location(LocationManager.NETWORK_PROVIDER);
+        markerLocation.setLatitude(point.latitude);
+        markerLocation.setLongitude(point.longitude);
+        float distance = mLastLocation.distanceTo(markerLocation);
+
+        distanceShower.setText("Distance "+String.valueOf(distance) + " m" + "\n ID: "+ID);
+    }
+
 
 
     @Override
